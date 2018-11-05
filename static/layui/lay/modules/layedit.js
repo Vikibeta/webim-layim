@@ -2,16 +2,16 @@
 
  @Name：layui.layedit 富文本编辑器
  @Author：贤心
- @License：LGPL
+ @License：MIT
     
  */
  
 layui.define(['layer', 'form'], function(exports){
   "use strict";
   
-  var $ = layui.jquery
+  var $ = layui.$
   ,layer = layui.layer
-  ,form = layui.form()
+  ,form = layui.form
   ,hint = layui.hint()
   ,device = layui.device()
   
@@ -107,7 +107,22 @@ layui.define(['layer', 'form'], function(exports){
     if(!iframeWin[0]) return;
     return $(iframeWin[0].document.body).text();
   };
-  
+  /**
+   * 设置编辑器内容
+   * @param {[type]} index   编辑器索引
+   * @param {[type]} content 要设置的内容
+   * @param {[type]} flag    是否追加模式
+   */
+  Edit.prototype.setContent = function(index, content, flag){
+    var iframeWin = getWin(index);
+    if(!iframeWin[0]) return;
+    if(flag){
+      $(iframeWin[0].document.body).append(content)
+    }else{
+      $(iframeWin[0].document.body).html(content)
+    };
+    layedit.sync(index)
+  };
   //将编辑器内容同步到textarea（一般用于异步提交时）
   Edit.prototype.sync = function(index){
     var iframeWin = getWin(index);
@@ -372,12 +387,11 @@ layui.define(['layer', 'form'], function(exports){
         var that = this;
         layui.use('upload', function(upload){
           var uploadImage = set.uploadImage || {};
-          upload({
+          upload.render({
             url: uploadImage.url
             ,method: uploadImage.type
             ,elem: $(that).find('input')[0]
-            ,unwrap: true
-            ,success: function(res){
+            ,done: function(res){
               if(res.code == 0){
                 res.data = res.data || {};
                 insertInline.call(iframeWin, 'img', {
@@ -509,15 +523,14 @@ layui.define(['layer', 'form'], function(exports){
     });
     link.index = index;
   }
-
+  
   //表情面板
   ,face = function(callback){
     //表情库
     var faces = function(){
-      var alt = ["[):]", "[:D]", "[;)]", "[:-o]", "[:p]","[(H)]","[:@]","[:s]","[:$]","[:(]","[:\'(]","[:|]","[(a)]","[8o|]","[8-|]","[+o(]","[<o)]","[|-)]","[*-)]","[:-#]","[:-*]","[^o)]","[8-)]","[(|)]","[(u)]","[(S)]","[(*)]","[(#)]","[(R)]","[({)]","[(})]","[(k)]","[(F)]","[(W)]","[(D)]" ], arr = {};
+      var alt = ["[微笑]", "[嘻嘻]", "[哈哈]", "[可爱]", "[可怜]", "[挖鼻]", "[吃惊]", "[害羞]", "[挤眼]", "[闭嘴]", "[鄙视]", "[爱你]", "[泪]", "[偷笑]", "[亲亲]", "[生病]", "[太开心]", "[白眼]", "[右哼哼]", "[左哼哼]", "[嘘]", "[衰]", "[委屈]", "[吐]", "[哈欠]", "[抱抱]", "[怒]", "[疑问]", "[馋嘴]", "[拜拜]", "[思考]", "[汗]", "[困]", "[睡]", "[钱]", "[失望]", "[酷]", "[色]", "[哼]", "[鼓掌]", "[晕]", "[悲伤]", "[抓狂]", "[黑线]", "[阴险]", "[怒骂]", "[互粉]", "[心]", "[伤心]", "[猪头]", "[熊猫]", "[兔子]", "[ok]", "[耶]", "[good]", "[NO]", "[赞]", "[来]", "[弱]", "[草泥马]", "[神马]", "[囧]", "[浮云]", "[给力]", "[围观]", "[威武]", "[奥特曼]", "[礼物]", "[钟]", "[话筒]", "[蜡烛]", "[蛋糕]"], arr = {};
       layui.each(alt, function(index, item){
-        var idx = index+1;
-        arr[item] = layui.cache.dir + 'images/easemob_face/ee_'+ idx + '.png';
+        arr[item] = layui.cache.dir + 'images/face/'+ index + '.gif';
       });
       return arr;
     }();
@@ -551,47 +564,7 @@ layui.define(['layer', 'form'], function(exports){
         $(document).off('click', face.hide).on('click', face.hide);
       }
     });
-  }  
-  // ,face = function(callback){
-  //   //表情库
-  //   var faces = function(){
-  //     var alt = ["[微笑]", "[嘻嘻]", "[哈哈]", "[可爱]", "[可怜]", "[挖鼻]", "[吃惊]", "[害羞]", "[挤眼]", "[闭嘴]", "[鄙视]", "[爱你]", "[泪]", "[偷笑]", "[亲亲]", "[生病]", "[太开心]", "[白眼]", "[右哼哼]", "[左哼哼]", "[嘘]", "[衰]", "[委屈]", "[吐]", "[哈欠]", "[抱抱]", "[怒]", "[疑问]", "[馋嘴]", "[拜拜]", "[思考]", "[汗]", "[困]", "[睡]", "[钱]", "[失望]", "[酷]", "[色]", "[哼]", "[鼓掌]", "[晕]", "[悲伤]", "[抓狂]", "[黑线]", "[阴险]", "[怒骂]", "[互粉]", "[心]", "[伤心]", "[猪头]", "[熊猫]", "[兔子]", "[ok]", "[耶]", "[good]", "[NO]", "[赞]", "[来]", "[弱]", "[草泥马]", "[神马]", "[囧]", "[浮云]", "[给力]", "[围观]", "[威武]", "[奥特曼]", "[礼物]", "[钟]", "[话筒]", "[蜡烛]", "[蛋糕]"], arr = {};
-  //     layui.each(alt, function(index, item){
-  //       arr[item] = layui.cache.dir + 'images/face/'+ index + '.gif';
-  //     });
-  //     return arr;
-  //   }();
-  //   face.hide = face.hide || function(e){
-  //     if($(e.target).attr('layedit-event') !== 'face'){
-  //       layer.close(face.index);
-  //     }
-  //   }
-  //   return face.index = layer.tips(function(){
-  //     var content = [];
-  //     layui.each(faces, function(key, item){
-  //       content.push('<li title="'+ key +'"><img src="'+ item +'" alt="'+ key +'"></li>');
-  //     });
-  //     return '<ul class="layui-clear">' + content.join('') + '</ul>';
-  //   }(), this, {
-  //     tips: 1
-  //     ,time: 0
-  //     ,skin: 'layui-box layui-util-face'
-  //     ,maxWidth: 500
-  //     ,success: function(layero, index){
-  //       layero.css({
-  //         marginTop: -4
-  //         ,marginLeft: -10
-  //       }).find('.layui-clear>li').on('click', function(){
-  //         callback && callback({
-  //           src: faces[this.title]
-  //           ,alt: this.title
-  //         });
-  //         layer.close(index);
-  //       });
-  //       $(document).off('click', face.hide).on('click', face.hide);
-  //     }
-  //   });
-  // }
+  }
   
   //插入代码面板
   ,code = function(callback){
